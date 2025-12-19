@@ -1,47 +1,40 @@
-import { db } from "./firebase-config.js";
-import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { Html5Qrcode } from "https://unpkg.com/html5-qrcode?module";
 
 const btnScan = document.getElementById("btnScanQR");
 const qrReader = document.getElementById("qr-reader");
 
-let qr;
+let html5QrCode = null;
 
-btnScan.onclick = () => {
+btnScan.addEventListener("click", async () => {
     qrReader.style.display = "block";
-    qr = new Html5Qrcode("qr-reader");
 
-    qr.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 250 },
-        async (studentId) => {
-            await loadStudent(studentId);
-            await qr.stop();
-            qrReader.style.display = "none";
-        }
-    );
-};
+    html5QrCode = new Html5Qrcode("qr-reader");
 
-async function loadStudent(studentId) {
     try {
-        const studentSnap = await getDoc(doc(db, "students", studentId));
-        if (!studentSnap.exists()) {
-            alert("Không tìm thấy học sinh");
+        const devices = await Html5Qrcode.getCameras();
+
+        if (!devices || devices.length === 0) {
+            alert("Không tìm thấy camera");
             return;
         }
 
-        const student = studentSnap.data();
-        document.getElementById("studentName").value = student.full_name;
-        document.getElementById("studentClass").value = student.class;
+        // Ưu tiên camera sau
+        const cameraId =
+            devices.find(d => d.label.toLowerCase().includes("back"))?.id
+            || devices[0].id;
 
-        if (student.bike_id) {
-            const bikeSnap = await getDoc(doc(db, "bikes", student.bike_id));
-            if (bikeSnap.exists()) {
-                document.getElementById("bikeCode").value =
-                    bikeSnap.data().license_plate;
+        await html5QrCode.start(
+            cameraId,
+            { fps: 10, qrbox: 250 },
+            (decodedText) => {
+                console.log("QR:", decodedText);
+                alert("QR: " + decodedText);
+                html5QrCode.stop();
             }
-        }
-    } catch (e) {
-        console.error(e);
-        alert("Lỗi khi quét QR");
+        );
+
+    } catch (err) {
+        console.error(err);
+        alert("Không thể mở camera: " + err);
     }
-}
+});
