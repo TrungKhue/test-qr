@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Test QR Camera</title>
+</head>
+<body>
+
+<h2>TEST MỞ CAMERA QUÉT QR</h2>
+
+<button id="start">Mở camera</button>
+<div id="reader" style="width:300px;"></div>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+<script>
+    const startBtn = document.getElementById("start");
+
+    startBtn.onclick = async () => {
+        const html5QrCode = new Html5Qrcode("reader");
+
+        try {
+            const cameras = await Html5Qrcode.getCameras();
+
+            if (!cameras.length) {
+                alert("Không có camera");
+                return;
+            }
+
+            await html5QrCode.start(
+                cameras[0].id,
+                { fps: 10, qrbox: 250 },
+                (text) => {
+                    alert("QR: " + text);
+                    html5QrCode.stop();
+                }
+            );
+
+        } catch (err) {
+            alert("Lỗi camera: " + err);
+            console.error(err);
+        }
+    };
+</script>
+
+</body>
+</html>
