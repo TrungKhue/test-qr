@@ -123,7 +123,7 @@
                 </div>
             </div>
 
-            <!-- FORM THỦ CÔNG (ĐƯỢC ĐIỀN TỰ ĐỘNG) -->
+            <!-- FORM -->
             <div class="col-lg-6">
                 <div class="card p-4 shadow-sm">
                     <h4 class="card-title">
@@ -131,7 +131,7 @@
                     </h4>
 
                     <div class="mb-3">
-                        <label class="form-label">Mã học sinh</label>
+                        <label class="form-label">Mã xe</label>
                         <input type="text" id="studentId" class="form-control" readonly>
                     </div>
 
@@ -147,17 +147,35 @@
 
                     <div class="mb-3">
                         <label class="form-label">Loại vi phạm</label>
-                        <select class="form-select">
+                        <select class="form-select" id="violationType">
                             <option>Để xe sai nơi quy định</option>
                             <option>Không đội mũ bảo hiểm</option>
                             <option>Đi học trễ</option>
                         </select>
                     </div>
 
-                    <button class="btn btn-success w-100">
+                    <button class="btn btn-success w-100" id="btnSubmit">
                         ✔ Ghi nhận (demo)
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL THÀNH CÔNG -->
+    <div class="modal fade" id="successModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content text-center p-4">
+                <div class="text-success fs-1 mb-2">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <h4 class="fw-bold">Ghi nhận thành công</h4>
+                <p class="text-muted mb-3">
+                    Vi phạm đã được ghi nhận (demo)
+                </p>
+                <button class="btn btn-success" data-bs-dismiss="modal">
+                    OK
+                </button>
             </div>
         </div>
     </div>
@@ -168,11 +186,12 @@
     <script>
         const btnScan = document.getElementById("btnScanQR");
         const reader = document.getElementById("qr-reader");
+        const btnSubmit = document.getElementById("btnSubmit");
 
-        // DATA DEMO
         const students = {
-            "HS001": { name: "Nguyễn Văn An", class: "Lớp A" },
-            "HS002": { name: "Lê Minh Tuấn", class: "Lớp C" }
+            "XE001234": { name: "Nguyễn Văn An", class: "Lớp 11A" },
+            "XD102345": { name: "Lê Minh Tuấn", class: "Lớp 12C" },
+            "XD998877": { name: "Nguyễn Hoàng Long", class: "Lớp 12B" }
         };
 
         let qr;
@@ -183,7 +202,7 @@
 
             try {
                 await qr.start(
-                    { facingMode: "environment" }, // CAMERA SAU
+                    { facingMode: "environment" },
                     { fps: 10, qrbox: 250 },
                     (text) => {
                         qr.stop();
@@ -195,15 +214,32 @@
                             return;
                         }
 
-                        document.getElementById("studentId").value = text;
-                        document.getElementById("studentName").value = st.name;
-                        document.getElementById("studentClass").value = st.class;
+                        studentId.value = text;
+                        studentName.value = st.name;
+                        studentClass.value = st.class;
                     }
                 );
             } catch (e) {
                 alert("Không mở được camera");
-                console.error(e);
             }
+        };
+
+        // 👉 SỰ KIỆN GHI NHẬN THÀNH CÔNG
+        btnSubmit.onclick = () => {
+            if (!studentId.value) {
+                alert("Vui lòng quét QR trước");
+                return;
+            }
+
+            const modal = new bootstrap.Modal(
+                document.getElementById("successModal")
+            );
+            modal.show();
+
+            // reset form (demo)
+            studentId.value = "";
+            studentName.value = "";
+            studentClass.value = "";
         };
     </script>
 
