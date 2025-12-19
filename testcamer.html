@@ -19,28 +19,27 @@
         const html5QrCode = new Html5Qrcode("reader");
 
         try {
-            const cameras = await Html5Qrcode.getCameras();
-
-            if (!cameras.length) {
-                alert("Không có camera");
-                return;
-            }
-
             await html5QrCode.start(
-                cameras[0].id,
-                { fps: 10, qrbox: 250 },
-                (text) => {
-                    alert("QR: " + text);
+                { facingMode: "environment" }, // 👈 CAMERA SAU
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                (decodedText) => {
+                    alert("QR: " + decodedText);
                     html5QrCode.stop();
+                },
+                (errorMessage) => {
+                    // bỏ qua lỗi quét
                 }
             );
-
         } catch (err) {
-            alert("Lỗi camera: " + err);
+            alert("Không mở được camera: " + err);
             console.error(err);
         }
     };
 </script>
+
 
 </body>
 </html>
